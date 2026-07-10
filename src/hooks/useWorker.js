@@ -5,7 +5,7 @@ export function useWorker() {
   const handlersRef = useRef({});
 
   useEffect(() => {
-    const worker = new Worker(`${import.meta.env.BASE_URL}xlsxWorker.js`);
+    const worker = new Worker(`${import.meta.env.BASE_URL}xlsxWorker.js?v=2`);
 
     worker.onmessage = (e) => {
       const { type } = e.data;
