@@ -28,6 +28,7 @@ export default function App() {
   const [currentSection, setCurrentSection] = useState(null);
   const [currentSchool, setCurrentSchool] = useState(null);
   const [selectedTrainer, setSelectedTrainer] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [assignDate, setAssignDate] = useState(todayISO());
   const [stats, setStats] = useState(null);
   const [sessionLog, setSessionLog] = useState([]);
@@ -38,6 +39,16 @@ export default function App() {
   const [districtAssignments, setDistrictAssignments] = useState({});
   const [allDistrictsList, setAllDistrictsList] = useState([]);
   const [originalFileName, setOriginalFileName] = useState('');
+
+  const districts = React.useMemo(() => {
+    const dSet = new Set();
+    schools.forEach(([_, counts]) => {
+      if (counts.district) {
+        dSet.add(counts.district);
+      }
+    });
+    return Array.from(dSet).sort((a, b) => a.localeCompare(b));
+  }, [schools]);
 
   // UI state
   const [isLoading, setIsLoading] = useState(true);
@@ -206,6 +217,7 @@ export default function App() {
 
   function resetWorkspace() {
     setCurrentSchool(null);
+    setSelectedDistrict('');
     setSelectedCheckboxes(new Set());
     setShowAssignment(false);
     setShowConfirmation(false);
@@ -220,6 +232,7 @@ export default function App() {
     setCurrentSection(sec);
     setAssignDate(todayISO());
     setSelectedTrainer('');
+    setSelectedDistrict('');
     setCurrentStep(3);
     resetWorkspace();
   }
@@ -227,6 +240,7 @@ export default function App() {
   // ─── TRAINER CHANGE ───
   function handleTrainerChange(trainer) {
     setSelectedTrainer(trainer);
+    setSelectedDistrict('');
     setCurrentSchool(null);
     setShowAssignment(false);
     setShowConfirmation(false);
@@ -428,6 +442,8 @@ export default function App() {
           <Workspace
             currentSection={currentSection}
             selectedTrainer={selectedTrainer}
+            selectedDistrict={selectedDistrict}
+            districts={districts}
             assignDate={assignDate}
             districtAssignments={districtAssignments}
             schools={schools}
@@ -442,6 +458,7 @@ export default function App() {
             sessionLog={sessionLog}
             onGoBack={() => goToStep(2)}
             onTrainerChange={handleTrainerChange}
+            onDistrictChange={setSelectedDistrict}
             onDateChange={setAssignDate}
             onOpenAddTrainer={() => setShowAddTrainerModal(true)}
             onRemoveTrainer={handleRemoveTrainer}

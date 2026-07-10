@@ -4,6 +4,7 @@ export default function SchoolSelector({
   visible,
   schools,
   selectedTrainer,
+  selectedDistrict,
   onPickSchool
 }) {
   const [searchValue, setSearchValue] = useState('');
@@ -26,11 +27,21 @@ export default function SchoolSelector({
     setIsOpen(false);
   }, [selectedTrainer]);
 
+  // Reset search when district changes
+  useEffect(() => {
+    setSearchValue('');
+    setIsOpen(false);
+  }, [selectedDistrict]);
+
   if (!visible) return null;
 
   const q = searchValue.toLowerCase().trim();
-  const filteredSchools = schools.filter(([name]) => name.toLowerCase().includes(q));
-  const totalSchools = schools.length;
+  const schoolsInDistrict = selectedDistrict
+    ? schools.filter(([_, counts]) => counts.district === selectedDistrict)
+    : schools;
+
+  const filteredSchools = schoolsInDistrict.filter(([name]) => name.toLowerCase().includes(q));
+  const totalSchools = schoolsInDistrict.length;
 
   return (
     <div className="school-selector" ref={containerRef} style={{ position: 'relative' }}>

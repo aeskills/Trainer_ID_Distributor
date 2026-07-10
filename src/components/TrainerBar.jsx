@@ -4,16 +4,24 @@ import { DEFAULT_TRAINERS, getSavedCustomTrainers, getRemovedTrainers } from '..
 export default function TrainerBar({
   trainers,
   selectedTrainer,
+  selectedDistrict = '',
+  districts = [],
   assignDate,
   onTrainerChange,
+  onDistrictChange,
   onDateChange,
   onOpenAddTrainer,
   onRemoveTrainer
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const dropdownRef = useRef(null);
-  const searchRef = useRef(null);
+  const [isTrainerOpen, setIsTrainerOpen] = useState(false);
+  const [trainerSearch, setTrainerSearch] = useState('');
+  const trainerDropdownRef = useRef(null);
+  const trainerSearchRef = useRef(null);
+
+  const [isDistrictOpen, setIsDistrictOpen] = useState(false);
+  const [districtSearch, setDistrictSearch] = useState('');
+  const districtDropdownRef = useRef(null);
+  const districtSearchRef = useRef(null);
 
   // Build trainer list from defaults + custom, minus removed
   const trainersSet = new Set(DEFAULT_TRAINERS);
@@ -32,15 +40,23 @@ export default function TrainerBar({
   const sortedTrainers = Array.from(trainersSet).sort((a, b) => a.localeCompare(b));
 
   const filteredTrainers = sortedTrainers.filter(t =>
-    t.toLowerCase().includes(search.toLowerCase().trim())
+    t.toLowerCase().includes(trainerSearch.toLowerCase().trim())
+  );
+
+  const filteredDistricts = districts.filter(d =>
+    d.toLowerCase().includes(districtSearch.toLowerCase().trim())
   );
 
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
-        setSearch('');
+      if (trainerDropdownRef.current && !trainerDropdownRef.current.contains(e.target)) {
+        setIsTrainerOpen(false);
+        setTrainerSearch('');
+      }
+      if (districtDropdownRef.current && !districtDropdownRef.current.contains(e.target)) {
+        setIsDistrictOpen(false);
+        setDistrictSearch('');
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -49,15 +65,29 @@ export default function TrainerBar({
 
   // Focus search when dropdown opens
   useEffect(() => {
-    if (isOpen && searchRef.current) {
-      searchRef.current.focus();
+    if (isTrainerOpen && trainerSearchRef.current) {
+      trainerSearchRef.current.focus();
     }
-  }, [isOpen]);
+  }, [isTrainerOpen]);
+
+  useEffect(() => {
+    if (isDistrictOpen && districtSearchRef.current) {
+      districtSearchRef.current.focus();
+    }
+  }, [isDistrictOpen]);
 
   function selectTrainer(name) {
     onTrainerChange(name);
-    setIsOpen(false);
-    setSearch('');
+    setIsTrainerOpen(false);
+    setTrainerSearch('');
+  }
+
+  function selectDistrict(name) {
+    if (onDistrictChange) {
+      onDistrictChange(name);
+    }
+    setIsDistrictOpen(false);
+    setDistrictSearch('');
   }
 
   function handleRemove(e, name) {
@@ -73,27 +103,27 @@ export default function TrainerBar({
         <label>Trainer Name</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {/* Custom Dropdown */}
-          <div className="custom-dropdown" ref={dropdownRef}>
+          <div className="custom-dropdown" ref={trainerDropdownRef}>
             <div
-              className={`custom-dropdown-trigger ${isOpen ? 'active' : ''}`}
-              onClick={() => setIsOpen(!isOpen)}
+              className={`custom-dropdown-trigger ${isTrainerOpen ? 'active' : ''}`}
+              onClick={() => setIsTrainerOpen(!isTrainerOpen)}
             >
               <span className={selectedTrainer ? 'selected-value' : 'placeholder-value'}>
                 {selectedTrainer || '— Select Trainer —'}
               </span>
-              <span className={`dropdown-arrow ${isOpen ? 'open' : ''}`}>▾</span>
+              <span className={`dropdown-arrow ${isTrainerOpen ? 'open' : ''}`}>▾</span>
             </div>
 
-            {isOpen && (
+            {isTrainerOpen && (
               <div className="custom-dropdown-menu">
                 {/* Search */}
                 <div className="dropdown-search-wrapper">
                   <span className="dropdown-search-icon">🔍</span>
                   <input
-                    ref={searchRef}
+                    ref={trainerSearchRef}
                     type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    value={trainerSearch}
+                    onChange={(e) => setTrainerSearch(e.target.value)}
                     placeholder="Search trainers..."
                     className="dropdown-search-input"
                     onClick={(e) => e.stopPropagation()}
@@ -129,8 +159,8 @@ export default function TrainerBar({
                   className="dropdown-add-trainer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsOpen(false);
-                    setSearch('');
+                    setIsTrainerOpen(false);
+                    setTrainerSearch('');
                     onOpenAddTrainer();
                   }}
                 >
@@ -142,6 +172,70 @@ export default function TrainerBar({
           </div>
         </div>
       </div>
+
+      {selectedTrainer && (
+        <div className="kpi-card">
+          <label>District Filter</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Custom Dropdown for District */}
+            <div className="custom-dropdown" ref={districtDropdownRef}>
+              <div
+                className={`custom-dropdown-trigger ${isDistrictOpen ? 'active' : ''}`}
+                onClick={() => setIsDistrictOpen(!isDistrictOpen)}
+              >
+                <span className={selectedDistrict ? 'selected-value' : 'placeholder-value'}>
+                  {selectedDistrict || `All Districts (${districts.length})`}
+                </span>
+                <span className={`dropdown-arrow ${isDistrictOpen ? 'open' : ''}`}>▾</span>
+              </div>
+
+              {isDistrictOpen && (
+                <div className="custom-dropdown-menu">
+                  {/* Search */}
+                  <div className="dropdown-search-wrapper">
+                    <span className="dropdown-search-icon">🔍</span>
+                    <input
+                      ref={districtSearchRef}
+                      type="text"
+                      value={districtSearch}
+                      onChange={(e) => setDistrictSearch(e.target.value)}
+                      placeholder="Search districts..."
+                      className="dropdown-search-input"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* District List */}
+                  <div className="dropdown-items-list">
+                    {districtSearch === '' && (
+                      <div
+                        className={`dropdown-item ${selectedDistrict === '' ? 'active' : ''}`}
+                        onClick={() => selectDistrict('')}
+                      >
+                        <span className="dropdown-item-name">All Districts ({districts.length})</span>
+                      </div>
+                    )}
+                    {filteredDistricts.length === 0 ? (
+                      <div className="dropdown-empty">No districts found</div>
+                    ) : (
+                      filteredDistricts.map(d => (
+                        <div
+                          key={d}
+                          className={`dropdown-item ${d === selectedDistrict ? 'active' : ''}`}
+                          onClick={() => selectDistrict(d)}
+                        >
+                          <span className="dropdown-item-name">{d}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="kpi-card" style={{ maxWidth: '220px' }}>
         <label>Assignment Date</label>
         <input

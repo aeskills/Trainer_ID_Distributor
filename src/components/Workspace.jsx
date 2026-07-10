@@ -7,6 +7,8 @@ import ConfirmationArea from './ConfirmationArea';
 export default function Workspace({
   currentSection,
   selectedTrainer,
+  selectedDistrict,
+  districts,
   assignDate,
   districtAssignments,
   schools,
@@ -21,6 +23,7 @@ export default function Workspace({
   sessionLog,
   onGoBack,
   onTrainerChange,
+  onDistrictChange,
   onDateChange,
   onOpenAddTrainer,
   onRemoveTrainer,
@@ -46,8 +49,11 @@ export default function Workspace({
       {/* Trainer + Date */}
       <TrainerBar
         selectedTrainer={selectedTrainer}
+        selectedDistrict={selectedDistrict}
+        districts={districts}
         assignDate={assignDate}
         onTrainerChange={onTrainerChange}
+        onDistrictChange={onDistrictChange}
         onDateChange={onDateChange}
         onOpenAddTrainer={onOpenAddTrainer}
         onRemoveTrainer={onRemoveTrainer}
@@ -65,6 +71,7 @@ export default function Workspace({
         visible={!!selectedTrainer}
         schools={schools}
         selectedTrainer={selectedTrainer}
+        selectedDistrict={selectedDistrict}
         onPickSchool={onPickSchool}
       />
 

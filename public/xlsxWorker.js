@@ -335,7 +335,13 @@ function handleGetSchools(section, trainer) {
     if (!isRowVisibleForTrainer(r, trainer)) return;
     const school = String(r.SchoolName).trim();
     if (!school) return;
-    if (!map[school]) map[school] = { total: 0, notShared: 0 };
+    if (!map[school]) {
+      map[school] = { 
+        total: 0, 
+        notShared: 0, 
+        district: String(r.District || '').trim() 
+      };
+    }
     map[school].total++;
     if (String(r.Status).toLowerCase().trim() !== 'shared') map[school].notShared++;
   });
