@@ -22,6 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Large Excel files (users must place their own Master Sheet.xlsx in public/)
-public/*.xlsx
