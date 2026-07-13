@@ -38,6 +38,23 @@ function getCellRef(r, c) {
   return COL_LETTERS[c] + (r + 1);
 }
 
+// Helper to convert Excel date serial number to DD-MM-YYYY string
+function formatExcelDate(serial) {
+  if (typeof serial !== 'number') return serial;
+  let days = serial;
+  if (days < 1) return '';
+  if (days === 60) return '29-02-1900';
+  if (days > 60) days--; // Adjust for Excel 1900 leap year bug
+  
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const dateObj = new Date((days - 25568) * msPerDay);
+  
+  const d = String(dateObj.getUTCDate()).padStart(2, '0');
+  const m = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+  const y = dateObj.getUTCFullYear();
+  return `${d}-${m}-${y}`;
+}
+
 self.onerror = function(message, source, lineno, colno, error) {
   self.postMessage({
     type: 'error',
@@ -218,7 +235,10 @@ function parseSheet(sheetName) {
     let hasData = false;
 
     for (let ci = 0; ci < COL_KEYS.length; ci++) {
-      const val = rowArr[ci] !== undefined ? rowArr[ci] : '';
+      let val = rowArr[ci] !== undefined ? rowArr[ci] : '';
+      if (COL_KEYS[ci] === 'Date' && typeof val === 'number') {
+        val = formatExcelDate(val);
+      }
       obj[COL_KEYS[ci]] = val;
       if (val !== '') hasData = true;
     }
